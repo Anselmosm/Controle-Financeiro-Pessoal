@@ -336,6 +336,11 @@
                 { id: 1, nome: 'Tesouro Direto', valor: 15000, rentabilidade: 12.5, tipo: 'Renda Fixa' },
                 { id: 2, nome: 'Ações', valor: 8000, rentabilidade: -2.3, tipo: 'Renda Variável' }
             ],
+            contasPagar: JSON.parse(localStorage.getItem('contasPagar')) || [
+                { id: 1, descricao: 'Conta de Luz', valor: 150, vencimento: '2024-11-10', categoria: 'Utilidades', status: 'pendente', recorrente: true },
+                { id: 2, descricao: 'Internet', valor: 100, vencimento: '2024-11-15', categoria: 'Utilidades', status: 'pendente', recorrente: true },
+                { id: 3, descricao: 'Cartão de Crédito', valor: 1200, vencimento: '2024-11-20', categoria: 'Cartão', status: 'pago', recorrente: true }
+            ],
             metas: JSON.parse(localStorage.getItem('metas')) || [
                 { id: 1, nome: 'Viagem Europa', valorMeta: 20000, valorAtual: 8500, prazo: '2024-12-31' },
                 { id: 2, nome: 'Reserva Emergência', valorMeta: 30000, valorAtual: 15000, prazo: '2024-12-31' }
