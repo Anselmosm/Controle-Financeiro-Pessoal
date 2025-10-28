@@ -1,4 +1,155 @@
-<!DOCTYPE html>
+        // Renderizar resumo
+        const renderResumo = () => {
+            const totals = calcTotals();
+            const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
+            
+            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const periodTitle = `${months[selectedMonth - 1]} de ${selectedYear}`;
+            
+            const categorias = totals.filteredDespesas.reduce((acc, despesa) => {
+                const existing = acc.find(item => item.categoria === despesa.categoria);
+                if (existing) {
+                    existing.valor += despesa.valor;
+                } else {
+                    acc.push({ categoria: despesa.categoria, valor: despesa.valor });
+                }
+                return acc;
+            }, []);
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Resumo Financeiro - ${periodTitle}</h2>
+                    </div>
+                    
+                    ${renderPeriodFilter()}
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Fluxo de Caixa do Período</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <div>
+                                        <span class="text-green-700 font-medium">Receitas Totais</span>
+                                        <p class="text-xs text-gray-500 mt-1">${totals.filteredReceitas.length} lançamento(s)</p>
+                                    </div>
+                                    <span class="text-green-600 font-bold">${displayValue(totals.totalReceitas)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                    <div>
+                                        <span class="text-red-700 font-medium">Despesas Totais</span>
+                                        <p class="text-xs text-gray-500 mt-1">${totals.filteredDespesas.length} lançamento(s)</p>
+                                    </div>
+                                    <span class="text-red-600 font-bold">${displayValue(totals.totalDespesas)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <span class="text-blue-700 font-medium">Saldo Líquido</span>
+                                    <span class="font-bold ${totals.saldoMensal >= 0 ? 'text-green-600' : 'text-red-600'}">${displayValue(totals.saldoMensal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Patrimônio (Total)</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <div>
+                                        <span class="text-blue-700 font-medium">Contas Bancárias</span>
+                                        <p class="text-xs text-gray-500 mt-1">${data.contasBancarias.length} conta(s)</p>
+                                    </div>
+                                    <span class="text-blue-600 font-bold">${displayValue(totals.saldoTotal)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                    <div>
+                                        <span class="text-purple-700 font-medium">Investimentos</span>
+                                        <p class="text-xs text-gray-500 mt-1">${data.investimentos.length} investimento(s)</p>
+                                    </div>
+                                    <span class="text-purple-600 font-bold">${displayValue(totals.totalInvestimentos)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <span class="text-green-700 font-medium">Patrimônio Total</span>
+                                    <span class="text-green-600 font-bold">${displayValue(totals.patrimonioTotal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${categorias.length > 0 ? `
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Distribuição de Despesas do Período</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            ${categorias.map(categoria => `
+                                <div class="p-4 border rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium text-gray-700">${categoria.categoria}</span>
+                                        <span class="font-bold text-gray-900">${displayValue(categoria.valor)}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: ${(categoria.valor / totals.totalDespesas) * 100}%"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">${Math.round((categoria.valor / totals.totalDespesas) * 100)}% do total</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="text-center py-8">
+                            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-lg">Nenhuma despesa encontrada neste período</p>
+                            <p class="text-gray-400 text-sm mt-2">Adicione despesas para ver a distribuição por categoria</p>
+                        </div>
+                    </div>
+                    `}
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Top 5 Receitas do Período</h3>
+                            <div class="space-y-3">
+                                ${totals.filteredReceitas.length > 0 ? 
+                                    totals.filteredReceitas
+                                        .sort((a, b) => b.valor - a.valor)
+                                        .slice(0, 5)
+                                        .map(receita => `
+                                            <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                                <div>
+                                                    <p class="font-medium text-gray-800">${receita.descricao}</p>
+                                                    <p class="text-xs text-gray-500">${formatDate(receita.data)} • ${receita.categoria}</p>
+                                                </div>
+                                                <span class="font-bold text-green-600">${displayValue(receita.valor)}</span>
+                                            </div>
+                                        `).join('') 
+                                    : '<p class="text-gray-500 text-center py-4">Nenhuma receita neste período</p>'
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Top 5 Despesas do Período</h3>
+                            <div class="space-y-3">
+                                ${totals.filteredDespesas.length > 0 ? 
+                                    totals.filteredDespesas
+                                        .sort((a, b) => b.valor - a.valor)
+                                        .slice(0, 5)
+                                        .map(despesa => `
+                                            <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                                <div>
+                                                    <p class="font-medium text-gray-800">${despesa.descricao}</p>
+                                                    <p class="text-xs text-gray-500">${formatDate(despesa.data)} • ${despesa.categoria}</p>
+                                                </div>
+                                                <span class="font-bold text-red-600">${displayValue(despesa.valor)}</span>
+                                            </div>
+                                        `).join('')
+                                    : '<p class="text-gray-500 text-center py-4">Nenhuma despesa neste período</p>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -195,6 +346,8 @@
         let currentTab = 'dashboard';
         let editingItem = null;
         let currentType = '';
+        let selectedMonth = new Date().getMonth() + 1; // Mês atual (1-12)
+        let selectedYear = new Date().getFullYear(); // Ano atual
 
         // Funções auxiliares
         const formatCurrency = (value) => {
@@ -218,8 +371,21 @@
         };
 
         const calcTotals = () => {
-            const totalReceitas = data.receitas.reduce((sum, item) => sum + item.valor, 0);
-            const totalDespesas = data.despesas.reduce((sum, item) => sum + item.valor, 0);
+            // Filtrar itens pelo mês e ano selecionados
+            const filterByDate = (items) => {
+                return items.filter(item => {
+                    const itemDate = new Date(item.data + 'T00:00:00');
+                    const itemMonth = itemDate.getMonth() + 1;
+                    const itemYear = itemDate.getFullYear();
+                    return itemMonth === selectedMonth && itemYear === selectedYear;
+                });
+            };
+            
+            const filteredReceitas = filterByDate(data.receitas);
+            const filteredDespesas = filterByDate(data.despesas);
+            
+            const totalReceitas = filteredReceitas.reduce((sum, item) => sum + item.valor, 0);
+            const totalDespesas = filteredDespesas.reduce((sum, item) => sum + item.valor, 0);
             const saldoTotal = data.contasBancarias.reduce((sum, conta) => sum + conta.saldo, 0);
             const totalInvestimentos = data.investimentos.reduce((sum, inv) => sum + inv.valor, 0);
             
@@ -229,7 +395,9 @@
                 saldoTotal,
                 totalInvestimentos,
                 saldoMensal: totalReceitas - totalDespesas,
-                patrimonioTotal: saldoTotal + totalInvestimentos
+                patrimonioTotal: saldoTotal + totalInvestimentos,
+                filteredReceitas,
+                filteredDespesas
             };
         };
 
@@ -462,6 +630,63 @@
             }
         };
 
+        // Função para mudar o período
+        const changePeriod = (month, year) => {
+            selectedMonth = parseInt(month);
+            selectedYear = parseInt(year);
+            showTab(currentTab);
+            updatePatrimonioTotal();
+        };
+
+        // Gerar opções de anos (últimos 5 anos e próximos 2)
+        const generateYearOptions = () => {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let i = currentYear - 5; i <= currentYear + 2; i++) {
+                years.push(i);
+            }
+            return years;
+        };
+
+        // Componente de filtro de período
+        const renderPeriodFilter = () => {
+            const months = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            
+            const years = generateYearOptions();
+            
+            return `
+                <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="font-medium text-gray-700">Período:</span>
+                        </div>
+                        
+                        <select id="monthFilter" onchange="changePeriod(this.value, document.getElementById('yearFilter').value)" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            ${months.map((month, index) => `
+                                <option value="${index + 1}" ${selectedMonth === index + 1 ? 'selected' : ''}>${month}</option>
+                            `).join('')}
+                        </select>
+                        
+                        <select id="yearFilter" onchange="changePeriod(document.getElementById('monthFilter').value, this.value)" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            ${years.map(year => `
+                                <option value="${year}" ${selectedYear === year ? 'selected' : ''}>${year}</option>
+                            `).join('')}
+                        </select>
+                        
+                        <button onclick="changePeriod(new Date().getMonth() + 1, new Date().getFullYear())" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium">
+                            Mês Atual
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
         // Navegação
         const showTab = (tab) => {
             currentTab = tab;
@@ -510,15 +735,24 @@
             const totals = calcTotals();
             const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
             
+            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const periodTitle = `${months[selectedMonth - 1]} de ${selectedYear}`;
+            
             return `
                 <div class="space-y-6 fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Dashboard - ${periodTitle}</h2>
+                    </div>
+                    
+                    ${renderPeriodFilter()}
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 card-hover">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-600 text-sm font-medium">Receitas Mensais</p>
+                                    <p class="text-gray-600 text-sm font-medium">Receitas do Período</p>
                                     <p class="text-2xl font-bold text-green-600 mt-1">${displayValue(totals.totalReceitas)}</p>
-                                    <p class="text-sm mt-1 text-green-600">↗ 8.5%</p>
+                                    <p class="text-xs text-gray-500 mt-1">${totals.filteredReceitas.length} lançamento(s)</p>
                                 </div>
                                 <div class="bg-green-100 p-3 rounded-full">
                                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -531,9 +765,9 @@
                         <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 card-hover">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-600 text-sm font-medium">Despesas Mensais</p>
+                                    <p class="text-gray-600 text-sm font-medium">Despesas do Período</p>
                                     <p class="text-2xl font-bold text-red-600 mt-1">${displayValue(totals.totalDespesas)}</p>
-                                    <p class="text-sm mt-1 text-red-600">↘ 3.2%</p>
+                                    <p class="text-xs text-gray-500 mt-1">${totals.filteredDespesas.length} lançamento(s)</p>
                                 </div>
                                 <div class="bg-red-100 p-3 rounded-full">
                                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -548,6 +782,7 @@
                                 <div>
                                     <p class="text-gray-600 text-sm font-medium">Saldo Atual</p>
                                     <p class="text-2xl font-bold text-blue-600 mt-1">${displayValue(totals.saldoTotal)}</p>
+                                    <p class="text-xs text-gray-500 mt-1">Todas as contas</p>
                                 </div>
                                 <div class="bg-blue-100 p-3 rounded-full">
                                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -562,7 +797,7 @@
                                 <div>
                                     <p class="text-gray-600 text-sm font-medium">Investimentos</p>
                                     <p class="text-2xl font-bold text-purple-600 mt-1">${displayValue(totals.totalInvestimentos)}</p>
-                                    <p class="text-sm mt-1 text-green-600">↗ 12.3%</p>
+                                    <p class="text-xs text-gray-500 mt-1">Total investido</p>
                                 </div>
                                 <div class="bg-purple-100 p-3 rounded-full">
                                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -575,7 +810,7 @@
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-lg font-semibold mb-4">Resumo Mensal</h3>
+                            <h3 class="text-lg font-semibold mb-4">Resumo do Período</h3>
                             <div class="space-y-3">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Total Receitas:</span>
@@ -587,7 +822,7 @@
                                 </div>
                                 <hr>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">Saldo Mensal:</span>
+                                    <span class="text-gray-600">Saldo do Período:</span>
                                     <span class="font-bold ${totals.saldoMensal >= 0 ? 'text-green-600' : 'text-red-600'}">${displayValue(totals.saldoMensal)}</span>
                                 </div>
                             </div>
