@@ -4,441 +4,895 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Controle Financeiro</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-react/0.263.1/lucide-react.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='%232563eb' viewBox='0 0 24 24'><path d='M12 2v20m0-20l-7 7h14l-7-7z'/></svg>">
     <style>
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
         .fade-in {
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.3s ease-in;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
-<body>
-    <div id="root">
-        <div class="loading">
-            <div class="text-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p class="text-gray-600">Carregando Sistema Financeiro...</p>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h1 class="text-xl font-bold text-gray-900">Sistema Financeiro</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="toggleValues" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <svg id="eyeIcon" class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600">Ocultar valores</span>
+                    </button>
+                    
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Patrimônio Total</p>
+                        <p id="patrimonioTotal" class="text-lg font-bold text-green-600">R$ 0,00</p>
+                    </div>
+                </div>
             </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <nav class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-4">
+                <ul class="space-y-2" id="navigation">
+                    <li>
+                        <button onclick="showTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors bg-blue-600 text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span class="font-medium">Dashboard</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('receitas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            <span class="font-medium">Receitas</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('despesas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            </svg>
+                            <span class="font-medium">Despesas</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('contas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <span class="font-medium">Contas Bancárias</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('cartoes')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <span class="font-medium">Cartões de Crédito</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('investimentos')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium">Investimentos</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('metas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium">Metas</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="showTab('resumo')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span class="font-medium">Resumo</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div id="mainContent"></div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-lg font-semibold"></h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { 
-            Home, TrendingUp, TrendingDown, CreditCard, PiggyBank, Target,
-            BarChart3, FileText, Plus, Edit2, Trash2, Eye, EyeOff, 
-            DollarSign, Wallet 
-        } = lucide;
-
-        const FinancialControlSystem = () => {
-            // Estados principais
-            const [activeTab, setActiveTab] = useState('dashboard');
-            const [showValues, setShowValues] = useState(true);
-            
-            // Estados para dados financeiros (com localStorage)
-            const [receitas, setReceitas] = useState(() => {
-                const saved = localStorage.getItem('receitas');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, descricao: 'Salário', valor: 5000, data: '2024-06-01', categoria: 'Trabalho' },
-                    { id: 2, descricao: 'Freelance', valor: 1500, data: '2024-06-05', categoria: 'Extra' }
-                ];
-            });
-            
-            const [despesas, setDespesas] = useState(() => {
-                const saved = localStorage.getItem('despesas');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, descricao: 'Aluguel', valor: 1200, data: '2024-06-01', categoria: 'Moradia' },
-                    { id: 2, descricao: 'Supermercado', valor: 400, data: '2024-06-03', categoria: 'Alimentação' },
-                    { id: 3, descricao: 'Gasolina', valor: 200, data: '2024-06-05', categoria: 'Transporte' }
-                ];
-            });
-            
-            const [contasBancarias, setContasBancarias] = useState(() => {
-                const saved = localStorage.getItem('contasBancarias');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, nome: 'Conta Corrente', banco: 'Banco do Brasil', saldo: 3500, tipo: 'Corrente' },
-                    { id: 2, nome: 'Conta Poupança', banco: 'Itaú', saldo: 8000, tipo: 'Poupança' }
-                ];
-            });
-            
-            const [cartoesCredito, setCartoesCredito] = useState(() => {
-                const saved = localStorage.getItem('cartoesCredito');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, nome: 'Cartão Principal', limite: 5000, usado: 1200, vencimento: '2024-06-15' },
-                    { id: 2, nome: 'Cartão Extra', limite: 2000, usado: 800, vencimento: '2024-06-20' }
-                ];
-            });
-            
-            const [investimentos, setInvestimentos] = useState(() => {
-                const saved = localStorage.getItem('investimentos');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, nome: 'Tesouro Direto', valor: 15000, rentabilidade: 12.5, tipo: 'Renda Fixa' },
-                    { id: 2, nome: 'Ações', valor: 8000, rentabilidade: -2.3, tipo: 'Renda Variável' }
-                ];
-            });
-            
-            const [metas, setMetas] = useState(() => {
-                const saved = localStorage.getItem('metas');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, nome: 'Viagem Europa', valorMeta: 20000, valorAtual: 8500, prazo: '2024-12-31' },
-                    { id: 2, nome: 'Reserva Emergência', valorMeta: 30000, valorAtual: 15000, prazo: '2024-12-31' }
-                ];
-            });
-
-            // Salvar no localStorage quando os dados mudarem
-            useEffect(() => {
-                localStorage.setItem('receitas', JSON.stringify(receitas));
-            }, [receitas]);
-
-            useEffect(() => {
-                localStorage.setItem('despesas', JSON.stringify(despesas));
-            }, [despesas]);
-
-            useEffect(() => {
-                localStorage.setItem('contasBancarias', JSON.stringify(contasBancarias));
-            }, [contasBancarias]);
-
-            useEffect(() => {
-                localStorage.setItem('cartoesCredito', JSON.stringify(cartoesCredito));
-            }, [cartoesCredito]);
-
-            useEffect(() => {
-                localStorage.setItem('investimentos', JSON.stringify(investimentos));
-            }, [investimentos]);
-
-            useEffect(() => {
-                localStorage.setItem('metas', JSON.stringify(metas));
-            }, [metas]);
-
-            // Modals
-            const [showModal, setShowModal] = useState(false);
-            const [modalType, setModalType] = useState('');
-            const [editingItem, setEditingItem] = useState(null);
-            const [formData, setFormData] = useState({});
-
-            // Cálculos
-            const totalReceitas = receitas.reduce((sum, item) => sum + item.valor, 0);
-            const totalDespesas = despesas.reduce((sum, item) => sum + item.valor, 0);
-            const saldoTotal = contasBancarias.reduce((sum, conta) => sum + conta.saldo, 0);
-            const totalInvestimentos = investimentos.reduce((sum, inv) => sum + inv.valor, 0);
-            const saldoMensal = totalReceitas - totalDespesas;
-
-            // Função para formatar moeda
-            const formatCurrency = (value) => {
-                return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                }).format(value);
-            };
-
-            // Função para formatar data
-            const formatDate = (dateString) => {
-                return new Date(dateString).toLocaleDateString('pt-BR');
-            };
-
-            // Componente do Modal
-            const Modal = ({ children, onClose }) => (
-                React.createElement('div', {
-                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50",
-                    onClick: (e) => e.target === e.currentTarget && onClose()
-                },
-                    React.createElement('div', {
-                        className: "bg-white rounded-lg p-6 w-full max-w-md mx-4 fade-in"
-                    },
-                        React.createElement('div', {
-                            className: "flex justify-between items-center mb-4"
-                        },
-                            React.createElement('h3', {
-                                className: "text-lg font-semibold"
-                            }, `${editingItem ? 'Editar' : 'Adicionar'} ${modalType}`),
-                            React.createElement('button', {
-                                onClick: onClose,
-                                className: "text-gray-500 hover:text-gray-700"
-                            }, React.createElement(Plus, { className: "w-5 h-5 rotate-45" }))
-                        ),
-                        children
-                    )
-                )
-            );
-
-            // Componente do Card
-            const Card = ({ title, value, icon: Icon, color = "blue", trend = null }) => (
-                React.createElement('div', {
-                    className: `bg-white rounded-xl shadow-lg p-6 border-l-4 border-${color}-500 fade-in hover:shadow-xl transition-shadow`
-                },
-                    React.createElement('div', {
-                        className: "flex items-center justify-between"
-                    },
-                        React.createElement('div', null,
-                            React.createElement('p', {
-                                className: "text-gray-600 text-sm font-medium"
-                            }, title),
-                            React.createElement('p', {
-                                className: `text-2xl font-bold text-${color}-600 mt-1`
-                            }, showValues ? value : '••••••'),
-                            trend && React.createElement('p', {
-                                className: `text-sm mt-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`
-                            }, `${trend > 0 ? '↗' : '↘'} ${Math.abs(trend)}%`)
-                        ),
-                        React.createElement('div', {
-                            className: `bg-${color}-100 p-3 rounded-full`
-                        }, React.createElement(Icon, { className: `w-6 h-6 text-${color}-600` }))
-                    )
-                )
-            );
-
-            // Dashboard
-            const Dashboard = () => (
-                React.createElement('div', { className: "space-y-6" },
-                    React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" },
-                        React.createElement(Card, {
-                            title: "Receitas Mensais",
-                            value: formatCurrency(totalReceitas),
-                            icon: TrendingUp,
-                            color: "green",
-                            trend: 8.5
-                        }),
-                        React.createElement(Card, {
-                            title: "Despesas Mensais",
-                            value: formatCurrency(totalDespesas),
-                            icon: TrendingDown,
-                            color: "red",
-                            trend: -3.2
-                        }),
-                        React.createElement(Card, {
-                            title: "Saldo Atual",
-                            value: formatCurrency(saldoTotal),
-                            icon: Wallet,
-                            color: "blue"
-                        }),
-                        React.createElement(Card, {
-                            title: "Investimentos",
-                            value: formatCurrency(totalInvestimentos),
-                            icon: PiggyBank,
-                            color: "purple",
-                            trend: 12.3
-                        })
-                    ),
-                    
-                    React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
-                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-6 fade-in" },
-                            React.createElement('h3', { className: "text-lg font-semibold mb-4" }, "Resumo Mensal"),
-                            React.createElement('div', { className: "space-y-3" },
-                                React.createElement('div', { className: "flex justify-between" },
-                                    React.createElement('span', { className: "text-gray-600" }, "Total Receitas:"),
-                                    React.createElement('span', { className: "font-semibold text-green-600" }, formatCurrency(totalReceitas))
-                                ),
-                                React.createElement('div', { className: "flex justify-between" },
-                                    React.createElement('span', { className: "text-gray-600" }, "Total Despesas:"),
-                                    React.createElement('span', { className: "font-semibold text-red-600" }, formatCurrency(totalDespesas))
-                                ),
-                                React.createElement('hr'),
-                                React.createElement('div', { className: "flex justify-between" },
-                                    React.createElement('span', { className: "text-gray-600" }, "Saldo Mensal:"),
-                                    React.createElement('span', {
-                                        className: `font-bold ${saldoMensal >= 0 ? 'text-green-600' : 'text-red-600'}`
-                                    }, formatCurrency(saldoMensal))
-                                )
-                            )
-                        ),
-                        
-                        React.createElement('div', { className: "bg-white rounded-xl shadow-lg p-6 fade-in" },
-                            React.createElement('h3', { className: "text-lg font-semibold mb-4" }, "Metas em Andamento"),
-                            React.createElement('div', { className: "space-y-4" },
-                                metas.slice(0, 2).map(meta => (
-                                    React.createElement('div', { key: meta.id },
-                                        React.createElement('div', { className: "flex justify-between mb-1" },
-                                            React.createElement('span', { className: "text-sm font-medium text-gray-700" }, meta.nome),
-                                            React.createElement('span', { className: "text-sm text-gray-500" }, 
-                                                `${Math.round((meta.valorAtual / meta.valorMeta) * 100)}%`
-                                            )
-                                        ),
-                                        React.createElement('div', { className: "w-full bg-gray-200 rounded-full h-2" },
-                                            React.createElement('div', {
-                                                className: "bg-blue-600 h-2 rounded-full transition-all duration-500",
-                                                style: { width: `${(meta.valorAtual / meta.valorMeta) * 100}%` }
-                                            })
-                                        )
-                                    )
-                                ))
-                            )
-                        )
-                    )
-                )
-            );
-
-            // Função para lidar com formulários
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                
-                const newId = Date.now();
-                const newItem = { ...formData, id: editingItem ? editingItem.id : newId };
-                
-                switch (modalType) {
-                    case 'Receita':
-                        if (editingItem) {
-                            setReceitas(receitas.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setReceitas([...receitas, newItem]);
-                        }
-                        break;
-                    case 'Despesa':
-                        if (editingItem) {
-                            setDespesas(despesas.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setDespesas([...despesas, newItem]);
-                        }
-                        break;
-                    case 'Conta Bancária':
-                        if (editingItem) {
-                            setContasBancarias(contasBancarias.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setContasBancarias([...contasBancarias, newItem]);
-                        }
-                        break;
-                    case 'Cartão de Crédito':
-                        if (editingItem) {
-                            setCartoesCredito(cartoesCredito.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setCartoesCredito([...cartoesCredito, newItem]);
-                        }
-                        break;
-                    case 'Investimento':
-                        if (editingItem) {
-                            setInvestimentos(investimentos.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setInvestimentos([...investimentos, newItem]);
-                        }
-                        break;
-                    case 'Meta':
-                        if (editingItem) {
-                            setMetas(metas.map(item => item.id === editingItem.id ? newItem : item));
-                        } else {
-                            setMetas([...metas, newItem]);
-                        }
-                        break;
-                }
-                
-                setShowModal(false);
-                setFormData({});
-                setEditingItem(null);
-            };
-
-            // Função para renderizar conteúdo baseado na aba ativa
-            const renderContent = () => {
-                switch (activeTab) {
-                    case 'dashboard':
-                        return React.createElement(Dashboard);
-                    default:
-                        return React.createElement(Dashboard);
-                }
-            };
-
-            // Navegação
-            const navigation = [
-                { id: 'dashboard', name: 'Dashboard', icon: Home },
-                { id: 'receitas', name: 'Receitas', icon: TrendingUp },
-                { id: 'despesas', name: 'Despesas', icon: TrendingDown },
-                { id: 'contas', name: 'Contas Bancárias', icon: Wallet },
-                { id: 'cartoes', name: 'Cartões de Crédito', icon: CreditCard },
-                { id: 'investimentos', name: 'Investimentos', icon: PiggyBank },
-                { id: 'metas', name: 'Metas', icon: Target },
-                { id: 'resumo', name: 'Resumo', icon: BarChart3 }
-            ];
-
-            return (
-                React.createElement('div', { className: "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100" },
-                    // Header
-                    React.createElement('header', { className: "bg-white shadow-lg border-b border-gray-200" },
-                        React.createElement('div', { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" },
-                            React.createElement('div', { className: "flex justify-between items-center h-16" },
-                                React.createElement('div', { className: "flex items-center" },
-                                    React.createElement(DollarSign, { className: "w-8 h-8 text-blue-600 mr-3" }),
-                                    React.createElement('h1', { className: "text-xl font-bold text-gray-900" }, "Sistema Financeiro")
-                                ),
-                                
-                                React.createElement('div', { className: "flex items-center space-x-4" },
-                                    React.createElement('button', {
-                                        onClick: () => setShowValues(!showValues),
-                                        className: "flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-                                    },
-                                        showValues ? 
-                                            React.createElement(Eye, { className: "w-4 h-4 text-gray-600" }) :
-                                            React.createElement(EyeOff, { className: "w-4 h-4 text-gray-600" }),
-                                        React.createElement('span', { className: "text-sm text-gray-600" },
-                                            showValues ? 'Ocultar' : 'Mostrar', ' valores'
-                                        )
-                                    ),
-                                    
-                                    React.createElement('div', { className: "text-right" },
-                                        React.createElement('p', { className: "text-sm text-gray-600" }, "Patrimônio Total"),
-                                        React.createElement('p', { className: "text-lg font-bold text-green-600" },
-                                            showValues ? formatCurrency(saldoTotal + totalInvestimentos) : '••••••'
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    ),
-
-                    React.createElement('div', { className: "flex" },
-                        // Sidebar
-                        React.createElement('nav', { className: "w-64 bg-white shadow-lg min-h-screen" },
-                            React.createElement('div', { className: "p-4" },
-                                React.createElement('ul', { className: "space-y-2" },
-                                    navigation.map((item) => {
-                                        const Icon = item.icon;
-                                        return React.createElement('li', { key: item.id },
-                                            React.createElement('button', {
-                                                onClick: () => setActiveTab(item.id),
-                                                className: `w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                                                    activeTab === item.id
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'text-gray-700 hover:bg-gray-100'
-                                                }`
-                                            },
-                                                React.createElement(Icon, { className: "w-5 h-5" }),
-                                                React.createElement('span', { className: "font-medium" }, item.name)
-                                            )
-                                        );
-                                    })
-                                )
-                            )
-                        ),
-
-                        // Main Content
-                        React.createElement('main', { className: "flex-1 p-8" },
-                            renderContent()
-                        )
-                    ),
-
-                    // Modal
-                    showModal && React.createElement(Modal, {
-                        onClose: () => setShowModal(false)
-                    }, "Formulário em construção...")
-                )
-            );
+    <script>
+        // Dados iniciais
+        let data = {
+            receitas: JSON.parse(localStorage.getItem('receitas')) || [
+                { id: 1, descricao: 'Salário', valor: 5000, data: '2024-10-01', categoria: 'Trabalho' },
+                { id: 2, descricao: 'Freelance', valor: 1500, data: '2024-10-05', categoria: 'Extra' }
+            ],
+            despesas: JSON.parse(localStorage.getItem('despesas')) || [
+                { id: 1, descricao: 'Aluguel', valor: 1200, data: '2024-10-01', categoria: 'Moradia' },
+                { id: 2, descricao: 'Supermercado', valor: 400, data: '2024-10-03', categoria: 'Alimentação' },
+                { id: 3, descricao: 'Gasolina', valor: 200, data: '2024-10-05', categoria: 'Transporte' }
+            ],
+            contasBancarias: JSON.parse(localStorage.getItem('contasBancarias')) || [
+                { id: 1, nome: 'Conta Corrente', banco: 'Banco do Brasil', saldo: 3500, tipo: 'Corrente' },
+                { id: 2, nome: 'Conta Poupança', banco: 'Itaú', saldo: 8000, tipo: 'Poupança' }
+            ],
+            cartoesCredito: JSON.parse(localStorage.getItem('cartoesCredito')) || [
+                { id: 1, nome: 'Cartão Principal', limite: 5000, usado: 1200, vencimento: '2024-11-15' },
+                { id: 2, nome: 'Cartão Extra', limite: 2000, usado: 800, vencimento: '2024-11-20' }
+            ],
+            investimentos: JSON.parse(localStorage.getItem('investimentos')) || [
+                { id: 1, nome: 'Tesouro Direto', valor: 15000, rentabilidade: 12.5, tipo: 'Renda Fixa' },
+                { id: 2, nome: 'Ações', valor: 8000, rentabilidade: -2.3, tipo: 'Renda Variável' }
+            ],
+            metas: JSON.parse(localStorage.getItem('metas')) || [
+                { id: 1, nome: 'Viagem Europa', valorMeta: 20000, valorAtual: 8500, prazo: '2024-12-31' },
+                { id: 2, nome: 'Reserva Emergência', valorMeta: 30000, valorAtual: 15000, prazo: '2024-12-31' }
+            ]
         };
 
-        // Renderizar o componente
-        const domContainer = document.querySelector('#root');
-        const root = ReactDOM.createRoot(domContainer);
-        root.render(React.createElement(FinancialControlSystem));
+        let showValues = true;
+        let currentTab = 'dashboard';
+        let editingItem = null;
+        let currentType = '';
+
+        // Funções auxiliares
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        };
+
+        const formatDate = (dateString) => {
+            return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
+        };
+
+        const saveData = () => {
+            localStorage.setItem('receitas', JSON.stringify(data.receitas));
+            localStorage.setItem('despesas', JSON.stringify(data.despesas));
+            localStorage.setItem('contasBancarias', JSON.stringify(data.contasBancarias));
+            localStorage.setItem('cartoesCredito', JSON.stringify(data.cartoesCredito));
+            localStorage.setItem('investimentos', JSON.stringify(data.investimentos));
+            localStorage.setItem('metas', JSON.stringify(data.metas));
+        };
+
+        const calcTotals = () => {
+            const totalReceitas = data.receitas.reduce((sum, item) => sum + item.valor, 0);
+            const totalDespesas = data.despesas.reduce((sum, item) => sum + item.valor, 0);
+            const saldoTotal = data.contasBancarias.reduce((sum, conta) => sum + conta.saldo, 0);
+            const totalInvestimentos = data.investimentos.reduce((sum, inv) => sum + inv.valor, 0);
+            
+            return {
+                totalReceitas,
+                totalDespesas,
+                saldoTotal,
+                totalInvestimentos,
+                saldoMensal: totalReceitas - totalDespesas,
+                patrimonioTotal: saldoTotal + totalInvestimentos
+            };
+        };
+
+        // Toggle valores
+        document.getElementById('toggleValues').addEventListener('click', () => {
+            showValues = !showValues;
+            const eyeIcon = document.getElementById('eyeIcon');
+            const btn = document.getElementById('toggleValues');
+            
+            if (showValues) {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+                btn.querySelector('span').textContent = 'Ocultar valores';
+            } else {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+                btn.querySelector('span').textContent = 'Mostrar valores';
+            }
+            
+            updatePatrimonioTotal();
+            showTab(currentTab);
+        });
+
+        const updatePatrimonioTotal = () => {
+            const totals = calcTotals();
+            const elem = document.getElementById('patrimonioTotal');
+            elem.textContent = showValues ? formatCurrency(totals.patrimonioTotal) : '••••••';
+        };
+
+        // Modal
+        const openModal = (type, item = null) => {
+            currentType = type;
+            editingItem = item;
+            document.getElementById('modalTitle').textContent = (item ? 'Editar' : 'Adicionar') + ' ' + type;
+            document.getElementById('modal').classList.remove('hidden');
+            renderModalForm();
+        };
+
+        const closeModal = () => {
+            document.getElementById('modal').classList.add('hidden');
+            editingItem = null;
+            currentType = '';
+        };
+
+        const renderModalForm = () => {
+            let html = '<form onsubmit="handleSubmit(event)" class="space-y-4">';
+            
+            const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500';
+            
+            switch(currentType) {
+                case 'Receita':
+                case 'Despesa':
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                            <input type="text" name="descricao" class="${inputClass}" value="${editingItem?.descricao || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                            <input type="number" step="0.01" name="valor" class="${inputClass}" value="${editingItem?.valor || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                            <input type="date" name="data" class="${inputClass}" value="${editingItem?.data || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                            <input type="text" name="categoria" class="${inputClass}" value="${editingItem?.categoria || ''}" required>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'Conta Bancária':
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Conta</label>
+                            <input type="text" name="nome" class="${inputClass}" value="${editingItem?.nome || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Banco</label>
+                            <input type="text" name="banco" class="${inputClass}" value="${editingItem?.banco || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Saldo</label>
+                            <input type="number" step="0.01" name="saldo" class="${inputClass}" value="${editingItem?.saldo || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select name="tipo" class="${inputClass}" required>
+                                <option value="">Selecione</option>
+                                <option value="Corrente" ${editingItem?.tipo === 'Corrente' ? 'selected' : ''}>Corrente</option>
+                                <option value="Poupança" ${editingItem?.tipo === 'Poupança' ? 'selected' : ''}>Poupança</option>
+                                <option value="Investimento" ${editingItem?.tipo === 'Investimento' ? 'selected' : ''}>Investimento</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'Cartão de Crédito':
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Cartão</label>
+                            <input type="text" name="nome" class="${inputClass}" value="${editingItem?.nome || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Limite</label>
+                            <input type="number" step="0.01" name="limite" class="${inputClass}" value="${editingItem?.limite || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor Usado</label>
+                            <input type="number" step="0.01" name="usado" class="${inputClass}" value="${editingItem?.usado || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Vencimento</label>
+                            <input type="date" name="vencimento" class="${inputClass}" value="${editingItem?.vencimento || ''}" required>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'Investimento':
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                            <input type="text" name="nome" class="${inputClass}" value="${editingItem?.nome || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                            <input type="number" step="0.01" name="valor" class="${inputClass}" value="${editingItem?.valor || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rentabilidade (%)</label>
+                            <input type="number" step="0.01" name="rentabilidade" class="${inputClass}" value="${editingItem?.rentabilidade || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select name="tipo" class="${inputClass}" required>
+                                <option value="">Selecione</option>
+                                <option value="Renda Fixa" ${editingItem?.tipo === 'Renda Fixa' ? 'selected' : ''}>Renda Fixa</option>
+                                <option value="Renda Variável" ${editingItem?.tipo === 'Renda Variável' ? 'selected' : ''}>Renda Variável</option>
+                                <option value="Fundos" ${editingItem?.tipo === 'Fundos' ? 'selected' : ''}>Fundos</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'Meta':
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Meta</label>
+                            <input type="text" name="nome" class="${inputClass}" value="${editingItem?.nome || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor da Meta</label>
+                            <input type="number" step="0.01" name="valorMeta" class="${inputClass}" value="${editingItem?.valorMeta || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor Atual</label>
+                            <input type="number" step="0.01" name="valorAtual" class="${inputClass}" value="${editingItem?.valorAtual || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prazo</label>
+                            <input type="date" name="prazo" class="${inputClass}" value="${editingItem?.prazo || ''}" required>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            html += `
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        ${editingItem ? 'Atualizar' : 'Adicionar'}
+                    </button>
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>`;
+            
+            document.getElementById('modalContent').innerHTML = html;
+        };
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const newItem = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (key === 'valor' || key === 'saldo' || key === 'limite' || key === 'usado' || key === 'rentabilidade' || key === 'valorMeta' || key === 'valorAtual') {
+                    newItem[key] = parseFloat(value);
+                } else {
+                    newItem[key] = value;
+                }
+            }
+            
+            if (editingItem) {
+                newItem.id = editingItem.id;
+            } else {
+                newItem.id = Date.now();
+            }
+            
+            const typeMap = {
+                'Receita': 'receitas',
+                'Despesa': 'despesas',
+                'Conta Bancária': 'contasBancarias',
+                'Cartão de Crédito': 'cartoesCredito',
+                'Investimento': 'investimentos',
+                'Meta': 'metas'
+            };
+            
+            const arrayName = typeMap[currentType];
+            
+            if (editingItem) {
+                const index = data[arrayName].findIndex(item => item.id === editingItem.id);
+                data[arrayName][index] = newItem;
+            } else {
+                data[arrayName].push(newItem);
+            }
+            
+            saveData();
+            closeModal();
+            showTab(currentTab);
+            updatePatrimonioTotal();
+        };
+
+        const deleteItem = (type, id) => {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                data[type] = data[type].filter(item => item.id !== id);
+                saveData();
+                showTab(currentTab);
+                updatePatrimonioTotal();
+            }
+        };
+
+        // Navegação
+        const showTab = (tab) => {
+            currentTab = tab;
+            
+            // Atualizar botões de navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+            });
+            
+            event.target.closest('button').classList.add('bg-blue-600', 'text-white');
+            event.target.closest('button').classList.remove('text-gray-700', 'hover:bg-gray-100');
+            
+            const content = document.getElementById('mainContent');
+            
+            switch(tab) {
+                case 'dashboard':
+                    content.innerHTML = renderDashboard();
+                    break;
+                case 'receitas':
+                    content.innerHTML = renderList('Receitas', data.receitas, ['Descrição', 'Valor', 'Data', 'Categoria'], 'receitas', 'Receita');
+                    break;
+                case 'despesas':
+                    content.innerHTML = renderList('Despesas', data.despesas, ['Descrição', 'Valor', 'Data', 'Categoria'], 'despesas', 'Despesa');
+                    break;
+                case 'contas':
+                    content.innerHTML = renderList('Contas Bancárias', data.contasBancarias, ['Nome', 'Banco', 'Saldo', 'Tipo'], 'contasBancarias', 'Conta Bancária');
+                    break;
+                case 'cartoes':
+                    content.innerHTML = renderCartoes();
+                    break;
+                case 'investimentos':
+                    content.innerHTML = renderList('Investimentos', data.investimentos, ['Nome', 'Valor', 'Rentabilidade (%)', 'Tipo'], 'investimentos', 'Investimento');
+                    break;
+                case 'metas':
+                    content.innerHTML = renderMetas();
+                    break;
+                case 'resumo':
+                    content.innerHTML = renderResumo();
+                    break;
+            }
+        };
+
+        // Renderizar Dashboard
+        const renderDashboard = () => {
+            const totals = calcTotals();
+            const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Receitas Mensais</p>
+                                    <p class="text-2xl font-bold text-green-600 mt-1">${displayValue(totals.totalReceitas)}</p>
+                                    <p class="text-sm mt-1 text-green-600">↗ 8.5%</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Despesas Mensais</p>
+                                    <p class="text-2xl font-bold text-red-600 mt-1">${displayValue(totals.totalDespesas)}</p>
+                                    <p class="text-sm mt-1 text-red-600">↘ 3.2%</p>
+                                </div>
+                                <div class="bg-red-100 p-3 rounded-full">
+                                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Saldo Atual</p>
+                                    <p class="text-2xl font-bold text-blue-600 mt-1">${displayValue(totals.saldoTotal)}</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Investimentos</p>
+                                    <p class="text-2xl font-bold text-purple-600 mt-1">${displayValue(totals.totalInvestimentos)}</p>
+                                    <p class="text-sm mt-1 text-green-600">↗ 12.3%</p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Resumo Mensal</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Receitas:</span>
+                                    <span class="font-semibold text-green-600">${displayValue(totals.totalReceitas)}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Despesas:</span>
+                                    <span class="font-semibold text-red-600">${displayValue(totals.totalDespesas)}</span>
+                                </div>
+                                <hr>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Saldo Mensal:</span>
+                                    <span class="font-bold ${totals.saldoMensal >= 0 ? 'text-green-600' : 'text-red-600'}">${displayValue(totals.saldoMensal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Metas em Andamento</h3>
+                            <div class="space-y-4">
+                                ${data.metas.slice(0, 2).map(meta => `
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700">${meta.nome}</span>
+                                            <span class="text-sm text-gray-500">${Math.round((meta.valorAtual / meta.valorMeta) * 100)}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: ${(meta.valorAtual / meta.valorMeta) * 100}%"></div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Renderizar lista genérica
+        const renderList = (title, items, headers, arrayName, itemType) => {
+            const displayValue = (value) => {
+                if (typeof value === 'number' && value > 50) {
+                    return showValues ? formatCurrency(value) : '••••••';
+                }
+                return value;
+            };
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
+                        <button onclick="openModal('${itemType}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Adicionar
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        ${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${items.map(item => `
+                                        <tr class="hover:bg-gray-50">
+                                            ${Object.entries(item).slice(1).map(([key, value]) => {
+                                                let displayVal = value;
+                                                if (key === 'data' || key === 'vencimento' || key === 'prazo') {
+                                                    displayVal = formatDate(value);
+                                                } else if (typeof value === 'number' && value > 50) {
+                                                    displayVal = displayValue(value);
+                                                }
+                                                return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${displayVal}</td>`;
+                                            }).join('')}
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button onclick='openModal("${itemType}", ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button onclick="deleteItem('${arrayName}', ${item.id})" class="text-red-600 hover:text-red-900">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Renderizar cartões
+        const renderCartoes = () => {
+            const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Cartões de Crédito</h2>
+                        <button onclick="openModal('Cartão de Crédito')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Adicionar
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${data.cartoesCredito.map(cartao => `
+                            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold">${cartao.nome}</h3>
+                                    <div class="flex gap-2">
+                                        <button onclick='openModal("Cartão de Crédito", ${JSON.stringify(cartao).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-900">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button onclick="deleteItem('cartoesCredito', ${cartao.id})" class="text-red-600 hover:text-red-900">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Limite:</span>
+                                        <span class="font-semibold">${displayValue(cartao.limite)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Usado:</span>
+                                        <span class="font-semibold text-red-600">${displayValue(cartao.usado)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Disponível:</span>
+                                        <span class="font-semibold text-green-600">${displayValue(cartao.limite - cartao.usado)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Vencimento:</span>
+                                        <span class="font-semibold">${formatDate(cartao.vencimento)}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-red-600 h-2 rounded-full transition-all duration-500" style="width: ${(cartao.usado / cartao.limite) * 100}%"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">${Math.round((cartao.usado / cartao.limite) * 100)}% utilizado</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Renderizar metas
+        const renderMetas = () => {
+            const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Metas Financeiras</h2>
+                        <button onclick="openModal('Meta')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Adicionar Meta
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${data.metas.map(meta => `
+                            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold">${meta.nome}</h3>
+                                    <div class="flex gap-2">
+                                        <button onclick='openModal("Meta", ${JSON.stringify(meta).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-900">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button onclick="deleteItem('metas', ${meta.id})" class="text-red-600 hover:text-red-900">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Meta:</span>
+                                        <span class="font-semibold">${displayValue(meta.valorMeta)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Atual:</span>
+                                        <span class="font-semibold text-blue-600">${displayValue(meta.valorAtual)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Restante:</span>
+                                        <span class="font-semibold text-orange-600">${displayValue(meta.valorMeta - meta.valorAtual)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Prazo:</span>
+                                        <span class="font-semibold">${formatDate(meta.prazo)}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Progresso</span>
+                                        <span class="text-sm text-gray-500">${Math.round((meta.valorAtual / meta.valorMeta) * 100)}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: ${Math.min((meta.valorAtual / meta.valorMeta) * 100, 100)}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Renderizar resumo
+        const renderResumo = () => {
+            const totals = calcTotals();
+            const displayValue = (value) => showValues ? formatCurrency(value) : '••••••';
+            
+            const categorias = data.despesas.reduce((acc, despesa) => {
+                const existing = acc.find(item => item.categoria === despesa.categoria);
+                if (existing) {
+                    existing.valor += despesa.valor;
+                } else {
+                    acc.push({ categoria: despesa.categoria, valor: despesa.valor });
+                }
+                return acc;
+            }, []);
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800">Resumo Financeiro</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Fluxo de Caixa</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <span class="text-green-700 font-medium">Receitas Totais</span>
+                                    <span class="text-green-600 font-bold">${displayValue(totals.totalReceitas)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                    <span class="text-red-700 font-medium">Despesas Totais</span>
+                                    <span class="text-red-600 font-bold">${displayValue(totals.totalDespesas)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <span class="text-blue-700 font-medium">Saldo Líquido</span>
+                                    <span class="font-bold ${totals.saldoMensal >= 0 ? 'text-green-600' : 'text-red-600'}">${displayValue(totals.saldoMensal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold mb-4">Patrimônio</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <span class="text-blue-700 font-medium">Contas Bancárias</span>
+                                    <span class="text-blue-600 font-bold">${displayValue(totals.saldoTotal)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                    <span class="text-purple-700 font-medium">Investimentos</span>
+                                    <span class="text-purple-600 font-bold">${displayValue(totals.totalInvestimentos)}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <span class="text-green-700 font-medium">Patrimônio Total</span>
+                                    <span class="text-green-600 font-bold">${displayValue(totals.patrimonioTotal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold mb-4">Distribuição de Despesas</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            ${categorias.map(categoria => `
+                                <div class="p-4 border rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-medium text-gray-700">${categoria.categoria}</span>
+                                        <span class="font-bold text-gray-900">${displayValue(categoria.valor)}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: ${(categoria.valor / totals.totalDespesas) * 100}%"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">${Math.round((categoria.valor / totals.totalDespesas) * 100)}% do total</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Inicializar
+        updatePatrimonioTotal();
+        showTab('dashboard');
     </script>
 </body>
 </html>
+                
