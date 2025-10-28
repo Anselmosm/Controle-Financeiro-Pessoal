@@ -623,6 +623,23 @@
                 return value;
             };
             
+            // Mapear os campos corretos baseado no tipo
+            const getFieldOrder = (itemType) => {
+                switch(itemType) {
+                    case 'Receita':
+                    case 'Despesa':
+                        return ['descricao', 'valor', 'data', 'categoria'];
+                    case 'Conta Bancária':
+                        return ['nome', 'banco', 'saldo', 'tipo'];
+                    case 'Investimento':
+                        return ['nome', 'valor', 'rentabilidade', 'tipo'];
+                    default:
+                        return Object.keys(items[0] || {}).filter(k => k !== 'id');
+                }
+            };
+            
+            const fieldOrder = getFieldOrder(itemType);
+            
             return `
                 <div class="space-y-6 fade-in">
                     <div class="flex justify-between items-center">
@@ -647,13 +664,20 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     ${items.map(item => `
                                         <tr class="hover:bg-gray-50">
-                                            ${Object.entries(item).slice(1).map(([key, value]) => {
+                                            ${fieldOrder.map(field => {
+                                                let value = item[field];
                                                 let displayVal = value;
-                                                if (key === 'data' || key === 'vencimento' || key === 'prazo') {
+                                                
+                                                if (field === 'data' || field === 'vencimento' || field === 'prazo') {
                                                     displayVal = formatDate(value);
+                                                } else if (field === 'valor' || field === 'saldo' || field === 'limite' || field === 'usado') {
+                                                    displayVal = displayValue(value);
+                                                } else if (field === 'rentabilidade') {
+                                                    displayVal = value + '%';
                                                 } else if (typeof value === 'number' && value > 50) {
                                                     displayVal = displayValue(value);
                                                 }
+                                                
                                                 return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${displayVal}</td>`;
                                             }).join('')}
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
